@@ -1,0 +1,138 @@
+import java.util.*;
+
+class Employee {
+    int id;
+    String name;
+    double salary;
+
+    Employee(int id, String name, double salary) {
+        this.id = id;
+        this.name = name;
+        this.salary = salary;
+    }
+
+    @Override
+    public String toString() {
+        return "ID: " + id + ", Name: " + name + ", Salary: " + salary;
+    }
+}
+
+class EmployeeManager {
+    private List<Employee> employees = new ArrayList<>();
+
+    void addEmployee(int id, String name, double salary) {
+        employees.add(new Employee(id, name, salary));
+    }
+
+    void updateEmployee(int id, String newName, double newSalary) {
+        for (Employee emp : employees) {
+            if (emp.id == id) {
+                emp.name = newName;
+                emp.salary = newSalary;
+                return;
+            }
+        }
+        System.out.println("Employee not found!");
+    }
+
+    void removeEmployee(int id) {
+        employees.removeIf(emp -> emp.id == id);
+    }
+
+    void searchEmployee(int id) {
+        for (Employee emp : employees) {
+            if (emp.id == id) {
+                System.out.println(emp);
+                return;
+            }
+        }
+        System.out.println("Employee not found!");
+    }
+
+    void displayEmployees() {
+        for (Employee emp : employees) System.out.println(emp);
+    }
+}
+
+class CardCollection {
+    private Map<String, List<String>> cards = new HashMap<>();
+
+    void addCard(String symbol, String cardName) {
+        cards.computeIfAbsent(symbol, k -> new ArrayList<>()).add(cardName);
+    }
+
+    void findCardsBySymbol(String symbol) {
+        if (cards.containsKey(symbol))
+            System.out.println("Cards under " + symbol + ": " + cards.get(symbol));
+        else
+            System.out.println("No cards found for " + symbol);
+    }
+}
+
+class TicketBookingSystem {
+    private static final int TOTAL_SEATS = 10;
+    private boolean[] seats = new boolean[TOTAL_SEATS];
+    private final Object lock = new Object();
+
+    void bookSeat(int seatNumber, String passengerName) {
+        synchronized (lock) {
+            if (seatNumber < 0 || seatNumber >= TOTAL_SEATS || seats[seatNumber]) {
+                System.out.println(passengerName + " - Seat " + seatNumber + " is already booked!");
+                return;
+            }
+            seats[seatNumber] = true;
+            System.out.println(passengerName + " successfully booked seat " + seatNumber);
+        }
+    }
+}
+
+class Passenger extends Thread {
+    private TicketBookingSystem system;
+    private int seatNumber;
+
+    Passenger(TicketBookingSystem system, int seatNumber, String name, int priority) {
+        super(name);
+        this.system = system;
+        this.seatNumber = seatNumber;
+        setPriority(priority);
+    }
+
+    @Override
+    public void run() {
+        system.bookSeat(seatNumber, getName());
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Easy Level: Employee Management
+        EmployeeManager empManager = new EmployeeManager();
+        empManager.addEmployee(1, "Alice", 50000);
+        empManager.addEmployee(2, "Bob", 60000);
+        empManager.updateEmployee(1, "Alice Brown", 55000);
+        empManager.searchEmployee(1);
+        empManager.removeEmployee(2);
+        empManager.displayEmployees();
+
+        // Medium Level: Card Collection
+        CardCollection cardCollection = new CardCollection();
+        cardCollection.addCard("Spades", "Ace");
+        cardCollection.addCard("Hearts", "Queen");
+        cardCollection.addCard("Spades", "King");
+        cardCollection.findCardsBySymbol("Spades");
+
+        // Hard Level: Ticket Booking System with Thread Synchronization
+        TicketBookingSystem system = new TicketBookingSystem();
+        Passenger p1 = new Passenger(system, 2, "VIP1", Thread.MAX_PRIORITY);
+        Passenger p2 = new Passenger(system, 2, "User2", Thread.NORM_PRIORITY);
+        Passenger p3 = new Passenger(system, 3, "VIP2", Thread.MAX_PRIORITY);
+        Passenger p4 = new Passenger(system, 4, "User4", Thread.MIN_PRIORITY);
+
+        p1.start();
+        p2.start();
+        p3.start();
+        p4.start();
+    }
+}
